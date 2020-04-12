@@ -1,0 +1,122 @@
+//===================================================================================================================================================================================================
+// The global variables we'll be using in this project
+
+float numOfCircles = 0;          // Number of circles in the first ring
+float fractionOfRing = 0;        // Imagine slicing a birthday cake in to numOfCircles slices (which in this case is currently 5). fractionOfRing will contain the angle (in radians) required to chop the ring in to 5 equal slices. Where we slice the rings is where we'll draw the circle in the ring
+float xPosition = 0;             // This variable will be used to temporarily hold the x position of the circles
+float yPosition = 0;             // This variable will be used to temporarily hold the y position of the circles
+float distanceFromOrigin = 50;   // How far away from the center of the window to we draw the ring of circles               
+float diameter = 0;              // This variable holds the diameter of the circles in the first ting (the innermost ring), and it's used as a reference to draw the circles of the outer rings
+int frameCounter = 0;            // This is incremented by one every time the draw() function is called (it therefore counts the number of frames that have passed as each call to draw() is a new frame)
+int numOfRings = 120;            // This is where you can change the number of rings in the image
+float noiseIncrement = 0;        // This slowly increases in value in the draw() function, and is fed in to the Perlin noise. This is what rotates the image (I won't keep this, it's just to demonstrate the use of Perlin noise) 
+
+//===================================================================================================================================================================================================
+
+
+
+
+
+//===================================================================================================================================================================================================
+//Initializing the window/canvas and the global variables we declared above
+
+void setup(){
+ 
+  size(1000,1000);    // As this is EP artwork, I assume you'll want the window to be a square? 
+  background(255);    // Set the background of the window to white for now, and we'll make the circles solid black later for simplicity
+  frameRate(30);      // Set this sketch to run at 30 frames per second (draw() will get called 30 times a second)
+
+}
+//===================================================================================================================================================================================================
+
+
+
+
+
+//===================================================================================================================================================================================================
+//Draw the rings of circles
+
+void draw(){
+  
+  
+    frameCounter = 0;
+
+  
+  if (frameCounter == 0){  
+  
+    
+    background(17);   
+   
+    /* Instead of the origin being in the default position (0, 0) which is the top left, I've moved it to the center of 
+    the window. This will really help when positioning the rings of circles as it allows us to rotate things relative to 
+    the center of the window, instead of the top left which is confusing */ 
+    translate(width/2, height/2); 
+    
+    
+    scale(0.2);
+   
+    // This is the for loop that allows us to draw multiple rings
+    for(int j = 1; j < numOfRings + 1; j++){
+      
+      //rotate(1/j*map(noise(noiseIncrement), -1, 1, 0, TWO_PI));
+      rotate(map(random(1), 0, 1, 0, TWO_PI/32));
+      
+      numOfCircles = 13 * j;
+      fractionOfRing = TWO_PI/numOfCircles;
+      diameter = ((width/numOfRings)/2);
+      diameter -= diameter/numOfRings/2;  // Without this, the outermost ring's circles will be clipped by the borders of the window. This 'tucks' them in so they always perfectly touch the sides without being clipped
+      distanceFromOrigin = diameter * j*11 + 300;
+     
+      for(int i = 0; i < numOfCircles; i++){    //This loop allows us to draw the 5 circles per frame (every time draw() is called)
+      
+        /* Instead of positioning the circles using the typical Cartesian coordinate system (x-axis and y-axis), we should use the 
+        Polar coordinate system, which can also position the circles anywhere in the window, but it uses an angle and distance from 
+        the origin, instead of an x and y coordinate. This is useful because this artwork will be bulit with 
+        circles/angles/rotations, so using the Polar coordinate system (which has angles built in to it) will make it suitable for this project. 
+        Imagine trying to position a bunch of circles in a perfect ring, by manually entering x and y coordinates for each one, it would take forever! 
+        The Polar coordinate system really simplifies this and makes it relatively easy to position things in a circle, however it initially requires a little 
+        trigonometry to convert us from the Cartesian coordinate system to the Polar coordinate system, which is what I'm doing below. 
+        Let me know if you need help understanding this, and I'll explain exactly what's going on, it's just a little complicated to 
+        explain here without disgrams :) */
+        xPosition = (random(1) * 15) + distanceFromOrigin * cos(i * fractionOfRing);    // Gives us the x coordinate/position from the Polar plane to draw the circle 
+        yPosition = (random(1) * 25) + distanceFromOrigin * sin(i * fractionOfRing);    // Gives us the y coordinate/position from the Polar plane to draw the circle
+        
+        
+        // Now lets draw these circles to the window! 
+
+         
+        /* This if statement below will only be true (and therefore run the code it contains which draws each circle) 85% of the time: random(1) creates a random 
+        float number between 0 and 1 and I've said, if it's bigger than 0.15 (which is 85% of the time), draw a circle. This is why the number of circles drawn 
+        in the ring changes every second, because this random function gets called every second and therefore spits out a different number each time. You can tweak this if you want. 
+        So if you were to put 0.8 instead of 0.15, a circle will be drawn 20% of the time instead (so hardly any will be drawn). This tiny little if statement is 
+        what adds a little chaos in to this like the original photo, and later we can use Perlin noise instead just so it looks more 'natural' when we draw more rings :) */
+       // diameter = diameter / 2;
+       if( random(1) > 0.15 ){  
+          fill(210);    // Fill the circles with black so they're easy to see
+          noStroke();    // We don't want an outline around them either, so tell Processing to not 'stroke' around them
+          ellipse( xPosition, yPosition, 0.3 * diameter/(0.009*j), 0.3 * diameter/(0.009*j) );    // Draw the circles at the x and y positions we calculated above using the Polar coordinate system, and give them a width and height of 30 pixels (for now)
+        }
+        
+        
+        
+        /*
+            Done! Now, feel free to play around with values. For example, change numOfCircles to 100, or 1000! Make sure that when you increase numOfCircles, you 
+            also decrease the width and height of the circles in the ellipse() function to stop them overlapping, so instead of a width and height of 30, make them 3 instead. 
+            Also play with distanceFromOrigin, which will make the ring bigger and smaller! This is the foundation of this project, and soon we'll build it up so 
+            Processing draws multiple rings, and it will automatically make the outer rings' circles smaller for us, and ensure the circles don't overlap, but we'll 
+            worry about all of that later. For now, just play around with the circle's widths and heights, distanceFromOrigin and numOfCircles :)
+            
+            If you need any help understanding any of this, just get in touch!
+            
+        */
+        
+      }  // End of the for loop that draws the circles in this first ring
+      
+    }  // End of the for loop that allows us to draw multiple rings
+    
+  }  // End of the if statement that only runs if frameCounter is 0
+  
+  frameCounter++;    //This is where frameCounter increments by one each time the draw() function is called (which is 30 times a second)
+  noiseIncrement += 0.005;
+}
+//
